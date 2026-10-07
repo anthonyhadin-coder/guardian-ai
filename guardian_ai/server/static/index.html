@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guardian AI — Autonomous Evidence-Driven SWE Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0a0d14;
+      --bg-surface: #111622;
+      --bg-surface-elevated: #161d2e;
+      --bg-card: rgba(22, 29, 46, 0.7);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(99, 102, 241, 0.4);
+      --accent-primary: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-amber: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --font-sans: 'Outfit', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 25%, rgba(236, 72, 153, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 45%);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 36px;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: blur(16px);
+      background: rgba(10, 13, 20, 0.85);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 36px 64px;
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      transition: border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-field, .textarea-field, .select-field {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus, .textarea-field:focus, .select-field:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+
+    .textarea-field {
+      resize: vertical;
+      min-height: 84px;
+      line-height: 1.5;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--accent-gradient);
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Stepper & Trace Activity Feed */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(17, 22, 34, 0.6);
+      border: 1px solid var(--border-subtle);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .step-icon.running {
+      background: rgba(6, 182, 212, 0.2);
+      color: var(--accent-cyan);
+      border: 1px solid var(--accent-cyan);
+      animation: pulse 1.5s infinite;
+    }
+
+    .step-icon.success {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-emerald);
+      border: 1px solid var(--accent-emerald);
+    }
+
+    .step-icon.failed {
+      background: rgba(244, 63, 94, 0.2);
+      color: var(--accent-rose);
+      border: 1px solid var(--accent-rose);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.95); }
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .step-duration {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    .step-details {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* Tabs & Content Panel */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 20px;
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      color: var(--text-main);
+      background: var(--bg-surface-elevated);
+      border-bottom: 2px solid var(--accent-primary);
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    /* Diff View */
+    .diff-container {
+      background: #0d1117;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      max-height: 520px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .diff-line-add {
+      color: #7ee787;
+      background: rgba(46, 160, 67, 0.15);
+      display: block;
+      padding: 1px 4px;
+    }
+
+    .diff-line-del {
+      color: #ffa198;
+      background: rgba(248, 81, 73, 0.15);
+      display: block;
+      padding: 1px 4px;
+    }
+
+    .diff-line-header {
+      color: #79c0ff;
+      display: block;
+      padding: 1px 4px;
+      font-weight: bold;
+    }
+
+    /* Metric Grid & Test Cards */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+    }
+
+    .metric-val {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .report-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      max-height: 520px;
+      overflow-y: auto;
+    }
+
+    .report-box h3 {
+      color: white;
+      margin: 16px 0 8px;
+    }
+
+    .report-box ul {
+      margin-left: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🛡️</div>
+      <div>
+        <h1>Guardian AI</h1>
+        <div style="font-size: 11px; color: var(--text-muted)">Autonomous Software Engineering Agent</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <div class="badge">
+        <span class="status-dot"></span>
+        Zero Hallucination Guard
+      </div>
+      <div class="badge" style="background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.3);">
+        ✓ Regression Safe
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Column: Controls & Execution Trace -->
+    <div>
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="panel-header">
+          <div class="panel-title">⚡ Autonomous Mission Control</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="repoSelect">Demo Preset / Repository</label>
+          <select id="repoSelect" class="select-field" onchange="onPresetChange()">
+            <option value="custom">-- Custom Repository Path --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="repoPath">Target Repository Path</label>
+          <input type="text" id="repoPath" class="input-field" placeholder="/absolute/path/to/repo">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="taskPrompt">Engineering Request</label>
+          <textarea id="taskPrompt" class="textarea-field" placeholder="Describe the bug fix or feature request..."></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+          <div>
+            <label class="form-label" for="providerSelect">Intelligence Model</label>
+            <select id="providerSelect" class="select-field">
+              <option value="auto">Auto-Detect</option>
+              <option value="gemini">Google Gemini</option>
+              <option value="openai">OpenAI GPT-4o</option>
+              <option value="anthropic">Anthropic Claude</option>
+              <option value="heuristic">Guardian Rule Engine (Local)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="maxIter">Repair Iterations</label>
+            <select id="maxIter" class="select-field">
+              <option value="3">3 Iterations (Recommended)</option>
+              <option value="5">5 Iterations</option>
+              <option value="1">1 Iteration</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="btnRunAgent" class="btn-primary" onclick="startAgentRun()">
+          <span>🛡️ Launch Autonomous SWE Agent</span>
+        </button>
+      </div>
+
+      <!-- Real-time Agent Activity Feed -->
+      <div class="card">
+        <div class="panel-header">
+          <div class="panel-title">📡 Live Agent Execution Trace</div>
+          <span id="runStatusBadge" class="badge">IDLE</span>
+        </div>
+        <div id="timelineContainer" class="timeline">
+          <div style="color: var(--text-dim); font-size: 12px; text-align: center; padding: 24px 0;">
+            Awaiting task launch. Activity will stream live here.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Verification & Evidence Dashboard -->
+    <div>
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div id="metricConfidence" class="metric-val" style="color: #818cf8;">--</div>
+          <div class="metric-label">Confidence Score</div>
+        </div>
+        <div class="metric-card">
+          <div id="metricRisk" class="metric-val" style="color: #34d399;">--</div>
+          <div class="metric-label">Regression Risk</div>
+        </div>
+        <div class="metric-card">
+          <div id="metricTests" class="metric-val" style="color: #38bdf8;">--</div>
+          <div class="metric-label">Baseline Tests</div>
+        </div>
+        <div class="metric-card">
+          <div id="metricRegressions" class="metric-val" style="color: #f43f5e;">--</div>
+          <div class="metric-label">Regressions Detected</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('tab-diff')">Unified Patch Diff</button>
+          <button class="tab-btn" onclick="switchTab('tab-tests')">Test Verification Panel</button>
+          <button class="tab-btn" onclick="switchTab('tab-report')">Engineering Report</button>
+          <button class="tab-btn" onclick="switchTab('tab-ast')">AST & Call Graph</button>
+        </div>
+
+        <!-- Diff Viewer Tab -->
+        <div id="tab-diff" class="tab-pane active">
+          <div class="panel-header">
+            <span style="font-size: 13px; color: var(--text-muted);">Smallest Correct Patch Verified Against Real Repository</span>
+            <span id="diffFilesBadge" class="badge">0 Files Changed</span>
+          </div>
+          <div id="diffViewer" class="diff-container">// No active diff. Launch an agent task to view verified patches.</div>
+        </div>
+
+        <!-- Test Verification Tab -->
+        <div id="tab-tests" class="tab-pane">
+          <div class="panel-header">
+            <span style="font-size: 13px; color: var(--text-muted);">Automated Baseline vs Post-Patch Verification</span>
+            <span id="testVerdictBadge" class="badge">Awaiting Run</span>
+          </div>
+          <div id="testOutputBox" class="report-box">
+            Select a test run to inspect raw framework outputs and regression proofs.
+          </div>
+        </div>
+
+        <!-- Engineering Report Tab -->
+        <div id="tab-report" class="tab-pane">
+          <div class="panel-header">
+            <span style="font-size: 13px; color: var(--text-muted);">Evidence-Driven Audit & Root-Cause Explanation</span>
+            <button class="badge" onclick="copyReport()" style="cursor: pointer;">📋 Copy Markdown</button>
+          </div>
+          <div id="reportBox" class="report-box">
+            The full engineering report will appear here upon task completion.
+          </div>
+        </div>
+
+        <!-- AST & Call Graph Tab -->
+        <div id="tab-ast" class="tab-pane">
+          <div class="panel-header">
+            <span style="font-size: 13px; color: var(--text-muted);">Indexed Symbols, Imports, and Impact Traversal</span>
+          </div>
+          <div id="astBox" class="report-box">
+            Repository structure and AST symbol map will be populated upon analysis.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let demoRepos = [];
+    let currentReport = null;
+
+    async function init() {
+      try {
+        const res = await fetch('/api/demo-repos');
+        const data = await res.json();
+        demoRepos = data.demos || [];
+        const select = document.getElementById('repoSelect');
+        demoRepos.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.path;
+          opt.textContent = `🎯 ${d.name} (Real Documented Bug)`;
+          select.appendChild(opt);
+        });
+        if (demoRepos.length > 0) {
+          select.value = demoRepos[0].path;
+          onPresetChange();
+        }
+      } catch (err) {
+        console.error('Failed to load demo repos', err);
+      }
+    }
+
+    function onPresetChange() {
+      const select = document.getElementById('repoSelect');
+      const found = demoRepos.find(d => d.path === select.value);
+      if (found) {
+        document.getElementById('repoPath').value = found.path;
+        document.getElementById('taskPrompt').value = found.default_task;
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    async function startAgentRun() {
+      const repoPath = document.getElementById('repoPath').value.trim();
+      const task = document.getElementById('taskPrompt').value.trim();
+      const provider = document.getElementById('providerSelect').value;
+      const maxIterations = parseInt(document.getElementById('maxIter').value, 10);
+
+      if (!repoPath || !task) {
+        alert('Please provide a repository path and task description.');
+        return;
+      }
+
+      const btn = document.getElementById('btnRunAgent');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⏳ Autonomous Agent Operating...</span>';
+      document.getElementById('runStatusBadge').textContent = 'RUNNING';
+      document.getElementById('runStatusBadge').style.borderColor = 'var(--accent-cyan)';
+      document.getElementById('runStatusBadge').style.color = 'var(--accent-cyan)';
+
+      const timeline = document.getElementById('timelineContainer');
+      timeline.innerHTML = '';
+
+      try {
+        const res = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            repo_path: repoPath,
+            task: task,
+            provider: provider === 'auto' ? null : provider,
+            max_iterations: maxIterations
+          })
+        });
+        const data = await res.json();
+        if (data.run_id) {
+          listenToStream(data.run_id);
+        }
+      } catch (err) {
+        alert('Failed to launch run: ' + err);
+        btn.disabled = false;
+        btn.innerHTML = '<span>🛡️ Launch Autonomous SWE Agent</span>';
+      }
+    }
+
+    function listenToStream(runId) {
+      const source = new EventSource(`/api/stream/${runId}`);
+      const timeline = document.getElementById('timelineContainer');
+
+      source.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload.type === 'step') {
+            const step = payload.data;
+            addTimelineStep(step);
+          } else if (payload.type === 'complete') {
+            source.close();
+            onRunComplete(payload.data);
+          } else if (payload.type === 'error') {
+            source.close();
+            alert('Agent error: ' + payload.error);
+            resetBtn();
+          }
+        } catch (e) {
+          console.error('Error handling SSE stream', e);
+        }
+      };
+
+      source.onerror = () => {
+        source.close();
+        resetBtn();
+      };
+    }
+
+    function addTimelineStep(step) {
+      const timeline = document.getElementById('timelineContainer');
+      const item = document.createElement('div');
+      item.className = 'timeline-item';
+      
+      const statusClass = step.status.toLowerCase();
+      const icon = statusClass === 'success' ? '✓' : (statusClass === 'failed' ? '✗' : '⏳');
+      const durText = step.duration_ms > 0 ? `${Math.round(step.duration_ms)}ms` : '';
+
+      item.innerHTML = `
+        <div class="step-icon ${statusClass}">${icon}</div>
+        <div class="step-content">
+          <div class="step-title">
+            <span>${step.name}</span>
+            <span class="step-duration">${durText}</span>
+          </div>
+          <div class="step-details">${step.details}</div>
+        </div>
+      `;
+      timeline.appendChild(item);
+      timeline.scrollTop = timeline.scrollHeight;
+    }
+
+    function onRunComplete(report) {
+      currentReport = report;
+      resetBtn();
+      document.getElementById('runStatusBadge').textContent = report.status;
+      document.getElementById('runStatusBadge').style.borderColor = 'var(--accent-emerald)';
+      document.getElementById('runStatusBadge').style.color = 'var(--accent-emerald)';
+
+      // Update metrics
+      document.getElementById('metricConfidence').textContent = `${report.solution_confidence}%`;
+      document.getElementById('metricRisk').textContent = `${report.regression_risk}%`;
+      document.getElementById('metricTests').textContent = `${report.baseline_tests.passed} pass`;
+      const regCount = report.regression_verification.newly_failed_tests.length;
+      document.getElementById('metricRegressions').textContent = regCount === 0 ? '0 (Clean)' : `${regCount} detected`;
+      document.getElementById('metricRegressions').style.color = regCount === 0 ? '#10b981' : '#f43f5e';
+
+      // Update diff
+      const diffViewer = document.getElementById('diffViewer');
+      if (report.unified_diff) {
+        document.getElementById('diffFilesBadge').textContent = `${report.files_changed.length} File(s) Changed`;
+        diffViewer.innerHTML = formatDiffHtml(report.unified_diff);
+      } else {
+        diffViewer.textContent = '// No code modifications applied.';
+      }
+
+      // Update test tab
+      const testBox = document.getElementById('testOutputBox');
+      document.getElementById('testVerdictBadge').textContent = report.regression_verification.verdict;
+      testBox.innerHTML = `
+        <h3>Baseline Tests:</h3>
+        <p>Passed: <b>${report.baseline_tests.passed}</b> | Failed: <b>${report.baseline_tests.failed}</b> | Skipped: <b>${report.baseline_tests.skipped}</b></p>
+        <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 12px 0;">
+        <h3>Post-Patch Verification Tests:</h3>
+        <p>Passed: <b>${report.post_patch_tests.passed}</b> | Failed: <b>${report.post_patch_tests.failed}</b></p>
+        <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 12px 0;">
+        <h3>Regression Verdict:</h3>
+        <p><b>${report.regression_verification.verdict}</b> (Newly failed tests: ${regCount})</p>
+        <pre style="margin-top: 14px; background: #0a0d14; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 11px;">${report.post_patch_tests.output || 'Test execution output captured'}</pre>
+      `;
+
+      // Update report tab
+      const reportBox = document.getElementById('reportBox');
+      reportBox.innerHTML = `
+        <h3>AI Software Engineering Report</h3>
+        <p><b>Task:</b> ${report.task}</p>
+        <p><b>Root Cause:</b> ${report.root_cause_explanation}</p>
+        <h3>Files Analyzed:</h3>
+        <ul>${report.files_analyzed.map(f => `<li>${f}</li>`).join('')}</ul>
+        <h3>Files Changed:</h3>
+        <ul>${report.files_changed.map(f => `<li>${f}</li>`).join('')}</ul>
+        <h3>Confidence Evidence:</h3>
+        <ul>${report.confidence_reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+      `;
+    }
+
+    function formatDiffHtml(diffText) {
+      return diffText.split('\n').map(line => {
+        const esc = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        if (line.startsWith('+') && !line.startsWith('+++')) {
+          return `<span class="diff-line-add">${esc}</span>`;
+        } else if (line.startsWith('-') && !line.startsWith('---')) {
+          return `<span class="diff-line-del">${esc}</span>`;
+        } else if (line.startsWith('@@') || line.startsWith('diff')) {
+          return `<span class="diff-line-header">${esc}</span>`;
+        }
+        return esc;
+      }).join('\n');
+    }
+
+    function resetBtn() {
+      const btn = document.getElementById('btnRunAgent');
+      btn.disabled = false;
+      btn.innerHTML = '<span>🛡️ Launch Autonomous SWE Agent</span>';
+    }
+
+    function copyReport() {
+      if (!currentReport) return;
+      navigator.clipboard.writeText(JSON.stringify(currentReport, null, 2));
+      alert('Engineering report copied to clipboard!');
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

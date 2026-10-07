@@ -1,0 +1,22 @@
+[project]
+name = "guardian-ai"
+version = "1.0.0"
+description = "Autonomous Evidence-Driven Software Engineering Agent"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pydantic>=2.0.0",
+    "pytest>=8.0.0",
+    "httpx>=0.27.0",
+    "rich>=13.7.0"
+]
+
+[project.scripts]
+guardian = "guardian_ai.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v"

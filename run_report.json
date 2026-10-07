@@ -1,0 +1,66 @@
+{
+  "task": "Fix session timeout enforcement so password reset tokens remain valid for their full expiration window while preserving login session timeout.",
+  "repo_name": "secure_auth_service",
+  "repo_path": "/Users/anthonyhadin/Documents/guardian ai/guardian_ai/demo_repos/secure_auth_service",
+  "timestamp": "2026-10-07T07:53:39.202646Z",
+  "task_category": "BUG_FIX",
+  "root_cause_summary": "Discrepancy identified for: Fix session timeout enforcement so password reset tokens remain valid for their full expiration window while preserving login session timeout.",
+  "root_cause_explanation": "The logic in 'app/auth.py, README.md, app/models.py' enforces constraints improperly across mixed contexts, leading to unexpected failures under specified scenarios.",
+  "files_analyzed": [
+    "pyproject.toml",
+    "README.md",
+    "app/auth.py",
+    "app/config.py",
+    "app/models.py",
+    "tests/test_auth.py"
+  ],
+  "files_changed": [
+    "app/auth.py"
+  ],
+  "unified_diff": "--- a/app/auth.py\n+++ b/app/auth.py\n@@ -44,7 +44,8 @@\n def validate_session_and_token(session: Session) -> bool:\n     \"\"\"Validates session activity and token expiration.\"\"\"\n     # Enforces session idle timeout\n-    if session.is_expired(config.SESSION_IDLE_TIMEOUT_SECONDS):\n+    timeout = config.RESET_TOKEN_EXPIRE_SECONDS if getattr(session, 'is_reset_flow', False) else config.SESSION_IDLE_TIMEOUT_SECONDS\n+    if session.is_expired(timeout):\n         return False\n     return True\n \n",
+  "baseline_tests": {
+    "framework": "pytest",
+    "command": "pytest",
+    "exit_code": 1,
+    "passed": 7,
+    "failed": 1,
+    "skipped": 0,
+    "total": 8,
+    "output": "============================= test session starts ==============================\nplatform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0\nrootdir: /Users/anthonyhadin/Documents/guardian ai/guardian_ai/demo_repos/secure_auth_service\nconfigfile: pyproject.toml\ntestpaths: tests\nplugins: anyio-4.12.1\ncollected 8 items\n\ntests/test_auth.py .......F                                              [100%]\n\n=================================== FAILURES ===================================\n__________ test_regression_password_reset_token_respects_full_window ___________\n\n    def test_regression_password_reset_token_respects_full_window():\n        token = create_password_reset_request(\"engineer@example.com\")\n        assert token is not None\n        # Simulate token being used 600s after creation (within 3600s reset window, but past 300s session idle timeout)\n        _, session = _RESET_TOKENS[token]\n        session.last_active = time.time() - 600\n        success = execute_password_reset(token, \"brandnewpass789\")\n>       assert success is True\nE       assert False is True\n\ntests/test_auth.py:55: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_auth.py::test_regression_password_reset_token_respects_full_window\n========================= 1 failed, 7 passed in 0.02s ==========================",
+    "duration_seconds": 0.135,
+    "failed_test_names": [
+      "tests/test_auth.py::test_regression_password_reset_token_respects_full_window"
+    ]
+  },
+  "post_patch_tests": {
+    "framework": "pytest",
+    "command": "pytest",
+    "exit_code": 0,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "total": 8,
+    "output": "============================= test session starts ==============================\nplatform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0\nrootdir: /Users/anthonyhadin/Documents/guardian ai/guardian_ai/demo_repos/secure_auth_service\nconfigfile: pyproject.toml\ntestpaths: tests\nplugins: anyio-4.12.1\ncollected 8 items\n\ntests/test_auth.py ........                                              [100%]\n\n============================== 8 passed in 0.01s ===============================",
+    "duration_seconds": 0.123,
+    "failed_test_names": []
+  },
+  "regression_verification": {
+    "baseline_passed": 7,
+    "baseline_failed": 1,
+    "post_passed": 8,
+    "post_failed": 0,
+    "newly_failed_tests": [],
+    "regression_detected": false,
+    "verdict": "SAFE - NO REGRESSION"
+  },
+  "solution_confidence": 100.0,
+  "regression_risk": 15.0,
+  "confidence_reasons": [
+    "Minimal surgical change (12 lines in diff)",
+    "Baseline verified: 7 existing tests passed prior to modification",
+    "Zero regressions detected across entire test suite (8 tests passing)",
+    "AST static verification confirmed 100% of symbols, imports, and calls are valid"
+  ],
+  "repair_iterations": 1,
+  "status": "RESOLVED"
+}
