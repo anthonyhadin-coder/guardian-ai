@@ -41,14 +41,29 @@ def list_demo_repos():
     demos_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "demo_repos"))
     available = []
     if os.path.exists(demos_path):
-        for item in os.listdir(demos_path):
+        for item in sorted(os.listdir(demos_path)):
             item_path = os.path.join(demos_path, item)
             if os.path.isdir(item_path):
+                # Check for documented task in README
+                readme_path = os.path.join(item_path, "README.md")
+                task_desc = "Inspect repository, verify existing test suite, and resolve documented issue."
+                if os.path.exists(readme_path):
+                    try:
+                        with open(readme_path, "r", encoding="utf-8") as f:
+                            content = f.read()
+                            if "Issue #" in content:
+                                for line in content.splitlines():
+                                    if "Issue #" in line or "Fix " in line or "Scope " in line:
+                                        task_desc = line.strip("#- *")
+                                        break
+                    except Exception:
+                        pass
+
                 available.append({
                     "id": item,
                     "name": item.replace("_", " ").title(),
                     "path": item_path,
-                    "default_task": "Fix session timeout enforcement so password reset tokens remain valid for their full expiration window while preserving login session timeout."
+                    "default_task": task_desc
                 })
     return {"demos": available}
 

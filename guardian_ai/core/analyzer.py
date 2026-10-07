@@ -125,10 +125,10 @@ class RepositoryAnalyzer:
                 is_test = self._is_test_file(rel_path)
                 is_config = self._is_config_file(file_name)
 
-                if is_test:
-                    test_files.append(rel_path)
-                elif is_config:
+                if is_config:
                     config_files.append(rel_path)
+                elif is_test:
+                    test_files.append(rel_path)
                 else:
                     source_files.append(rel_path)
 
@@ -166,10 +166,14 @@ class RepositoryAnalyzer:
 
     def _is_test_file(self, rel_path: str) -> bool:
         low = rel_path.lower()
+        if "config" in low:
+            return False
         return (
-            "test" in low or
+            "/tests/" in f"/{low}/" or
+            "/test/" in f"/{low}/" or
             low.endswith("_test.py") or
             low.startswith("test_") or
+            "/test_" in low or
             low.endswith(".test.js") or
             low.endswith(".spec.js") or
             low.endswith(".test.ts") or
@@ -180,9 +184,9 @@ class RepositoryAnalyzer:
         configs = {
             "pyproject.toml", "setup.py", "requirements.txt", "package.json",
             "tsconfig.json", "dockerfile", "docker-compose.yml", "makefile",
-            "pytest.ini", "tox.ini", "jest.config.js", "vitest.config.ts"
+            "pytest.ini", "tox.ini", "jest.config.js", "vitest.config.ts", "vitest.config.js"
         }
-        return file_name.lower() in configs
+        return file_name.lower() in configs or "config." in file_name.lower()
 
     def _analyze_file(self, abs_path: str, rel_path: str, is_test: bool) -> Optional[FileAnalysis]:
         try:

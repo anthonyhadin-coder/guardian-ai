@@ -61,6 +61,14 @@ class TaskClassification(BaseModel):
     unrelated_files: List[str] = Field(default_factory=list)
     target_symbols: List[str] = Field(default_factory=list)
 
+class ImpactGraph(BaseModel):
+    target_files: List[str] = Field(default_factory=list)
+    target_symbols: List[str] = Field(default_factory=list)
+    direct_callers: List[str] = Field(default_factory=list)
+    indirect_callers: List[str] = Field(default_factory=list)
+    affected_tests: List[str] = Field(default_factory=list)
+    external_interfaces: List[str] = Field(default_factory=list)
+
 class RootCauseHypothesis(BaseModel):
     problem_summary: str
     root_cause_explanation: str
@@ -70,6 +78,12 @@ class RootCauseHypothesis(BaseModel):
     affected_components: List[str] = Field(default_factory=list)
     safe_patch_strategy: str
 
+class ValidationLayerResult(BaseModel):
+    layer: str  # "syntax", "imports", "symbols", "dependencies", "diff", "tests"
+    passed: bool
+    details: str
+    errors: List[str] = Field(default_factory=list)
+
 class CodePatch(BaseModel):
     file_path: str
     original_snippet: str
@@ -78,6 +92,12 @@ class CodePatch(BaseModel):
     rationale: str
     hallucination_check_passed: bool = True
     validation_errors: List[str] = Field(default_factory=list)
+    validation_layers: List[ValidationLayerResult] = Field(default_factory=list)
+
+class MultiFilePatchPlan(BaseModel):
+    patches: List[CodePatch] = Field(default_factory=list)
+    summary: str = ""
+    target_files: List[str] = Field(default_factory=list)
 
 class TestOutcome(BaseModel):
     __test__ = False
@@ -90,7 +110,9 @@ class TestOutcome(BaseModel):
     total: int = 0
     output: str = ""
     duration_seconds: float = 0.0
+    passed_test_names: List[str] = Field(default_factory=list)
     failed_test_names: List[str] = Field(default_factory=list)
+    skipped_test_names: List[str] = Field(default_factory=list)
 
 class RegressionVerification(BaseModel):
     baseline_passed: int
@@ -98,6 +120,8 @@ class RegressionVerification(BaseModel):
     post_passed: int
     post_failed: int
     newly_failed_tests: List[str] = Field(default_factory=list)
+    pre_existing_failures_preserved: List[str] = Field(default_factory=list)
+    fixed_tests: List[str] = Field(default_factory=list)
     regression_detected: bool = False
     verdict: str = "SAFE"
 
